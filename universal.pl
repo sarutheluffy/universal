@@ -132,8 +132,12 @@ if (not defined $ARGV[0] ) {
 # 
 sub main {
     ################# Testing different files ######################
+    $dotpos = rindex($ARGV[1], '.');
+    @filesplits = split('.', $ARGV[1]);
+    $extension = $filesplits[-1];
     ##########     C      ##################
-    if test "${1:nameLen-2}" == '.c' ;  then
+    #if test "${1:nameLen-2}" == '.c' ;  then
+    if ( $extension == 'c' ) {
     #if [["${1:nameLen-2}"=="*.c"]] ; then
     #    command -v gcc >/dev/null 2>&1 || { print >&2 "Hey I require gcc but it's not installed.";
     #                                             print "Copy/Paste ===> sudo apt-get install gcc"; print "Aborting :("; print; exit 1; }
@@ -143,7 +147,8 @@ sub main {
             print "Copy/Paste ===> sudo apt-get install gcc\n"; 
             die("Aborting :(\n"); 
         }
-        filename=${1:0:nameLen-2}     #striping last 2 char i.e. '.c'
+        #filename=${1:0:nameLen-2}     #striping last 2 char i.e. '.c'
+        $filename= $ARGV[1](0,-2);
         print " = = = = = = GCC: Compiling $filename .c file = = = = = =\n";
         print "gcc -g -O2 -Wall -Wextra -Isrc -rdynamic -O2 -fomit-frame-pointer -o $filename.out $1\n";    #-g to make gdb compaitable
         print "Error(if any):\n";   #newline
@@ -192,30 +197,30 @@ sub main {
         print " + + + + + + JAVA: Compiling $filename .java file + + + + + "
         print    #newline
         print "Performing 'javac $1'"
-        command javac $1 || compiled=false
+        $compiled = `javac $1`;
         if [ $? -ne 0 ] ; then
+        if (!( $compiled eq 0 )) {
             compiled=false
-        else
+        } else {
             print    #newline
             print " + + + + + + \`java $filename\` OUTPUT follows: "
-            command java $filename || compiled=false
-        fi
+            $compiled = `java $filename`;
+        }
     ############## Unknow file format ################
-    else 
+    else {  # $dotpos == -1
         print    #newline
         print "NOTICE: Unknown File format \"$1\""
-        usage
+        usage();
         compiled=false
-    fi
+    }
     ############# end of filetype if #####################
     #if [ $? -ne 0 ]    #previous command gcc g++ javac python
-    if test $compiled == false
-    then
+    if ( $compiled == false ) {
         print    #newline
         print "Ouch, The process of compilation failed."
         print "For Copy/Paste ===> vi $1"
         compiled=false
-    fi
+    }
 } #end of main function
 # #if test $compiled == true ; then
 # #else    #Show Usage & Help
